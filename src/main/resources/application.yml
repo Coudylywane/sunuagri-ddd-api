@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: sunuagri
+  jackson:
+    default-property-inclusion: non_null
+    generator:
+      write-bigdecimal-as-plain: true
+
+server:
+  port: 8080
+
+# Paramètres métier de la coopérative (valeurs de référence du sujet).
+# Ils sont regroupés ici et injectés via ConfigurationCooperative.
+cooperative:
+  superficie-max-producteur-ha: 50
+  commande-min-kg: 50
+  commission-pct: 5
+  ecart-prix-pct: 30
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    sn.sunuagri: INFO
