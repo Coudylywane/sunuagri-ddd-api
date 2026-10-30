@@ -1,0 +1,2342 @@
+openapi: 3.0.1
+info:
+  title: SunuAgri API
+  description: |
+    API de la coopérative agricole SunuAgri.
+    L'authentification est simulée : chaque requête porte les en-têtes
+    X-Utilisateur-Id (identifiant du producteur ou de l'acheteur selon le rôle)
+    et X-Role (PRODUCTEUR, ACHETEUR, AGENT, ADMINISTRATEUR).
+    Toutes les erreurs suivent le même format : code, message, details,
+    horodatage et chemin.
+  version: 1.0.0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+tags:
+- name: Récoltes et stock
+  description: "US-08, US-09"
+- name: "Offres, commandes et paiements"
+  description: "US-10 à US-14, US-16, US-17"
+- name: Paramètres et prix du marché
+  description: "US-18, US-19"
+- name: Producteurs et parcelles
+  description: "US-01, US-02, US-03, US-15, US-17"
+- name: "Campagnes, cultures et récoltes"
+  description: "US-04, US-05, US-06, US-07"
+paths:
+  /api/v1/parametres/cultures/{culture}:
+    put:
+      tags:
+      - Paramètres et prix du marché
+      operationId: modifier
+      parameters:
+      - name: culture
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ModifierParametre"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParametreCultureVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/recoltes/{recolteId}/livraisons:
+    post:
+      tags:
+      - Récoltes et stock
+      operationId: livrer
+      parameters:
+      - name: recolteId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Livraison"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LivraisonVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/producteurs:
+    get:
+      tags:
+      - Producteurs et parcelles
+      operationId: lister
+      parameters:
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProducteurVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+    post:
+      tags:
+      - Producteurs et parcelles
+      operationId: enregistrer
+      parameters:
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnregistrerProducteur"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProducteurVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/producteurs/{producteurId}/parcelles:
+    get:
+      tags:
+      - Producteurs et parcelles
+      operationId: parcelles
+      parameters:
+      - name: producteurId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ParcelleVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+    post:
+      tags:
+      - Producteurs et parcelles
+      operationId: declarerParcelle
+      parameters:
+      - name: producteurId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeclarerParcelle"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParcelleVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/producteurs/import:
+    post:
+      tags:
+      - Producteurs et parcelles
+      operationId: importer
+      parameters:
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      requestBody:
+        content:
+          text/csv:
+            schema:
+              type: string
+          text/plain:
+            schema:
+              type: string
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/offres:
+    get:
+      tags:
+      - "Offres, commandes et paiements"
+      operationId: offres
+      parameters:
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OffreVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+    post:
+      tags:
+      - "Offres, commandes et paiements"
+      operationId: publierOffre
+      parameters:
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublierOffre"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicationOffreVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/offres/{offreId}/retrait:
+    post:
+      tags:
+      - "Offres, commandes et paiements"
+      operationId: retirerOffre
+      parameters:
+      - name: offreId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OffreVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/cultures:
+    post:
+      tags:
+      - "Campagnes, cultures et récoltes"
+      operationId: declarerCulture
+      parameters:
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeclarerCulture"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CultureVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/cultures/{cultureId}/semis:
+    post:
+      tags:
+      - "Campagnes, cultures et récoltes"
+      operationId: semer
+      parameters:
+      - name: cultureId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Semis"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CultureVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/cultures/{cultureId}/recolte:
+    post:
+      tags:
+      - "Campagnes, cultures et récoltes"
+      operationId: recolter
+      parameters:
+      - name: cultureId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Recolte"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecolteVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/commandes:
+    get:
+      tags:
+      - "Offres, commandes et paiements"
+      operationId: historique
+      parameters:
+      - name: statut
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: taille
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageCommandesVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+    post:
+      tags:
+      - "Offres, commandes et paiements"
+      operationId: passerCommande
+      parameters:
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasserCommande"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommandeVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/commandes/{commandeId}/livraison:
+    post:
+      tags:
+      - "Offres, commandes et paiements"
+      operationId: livrerCommande
+      parameters:
+      - name: commandeId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LivraisonCommandeVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/commandes/{commandeId}/annulation:
+    post:
+      tags:
+      - "Offres, commandes et paiements"
+      operationId: annulerCommande
+      parameters:
+      - name: commandeId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommandeVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/campagnes:
+    get:
+      tags:
+      - "Campagnes, cultures et récoltes"
+      operationId: lister_2
+      parameters:
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CampagneVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+    post:
+      tags:
+      - "Campagnes, cultures et récoltes"
+      operationId: ouvrir
+      parameters:
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OuvrirCampagne"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CampagneVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/campagnes/{campagneId}/cloture:
+    post:
+      tags:
+      - "Campagnes, cultures et récoltes"
+      operationId: cloturer
+      parameters:
+      - name: campagneId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CampagneVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/stock:
+    get:
+      tags:
+      - Récoltes et stock
+      operationId: consulter
+      parameters:
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/producteurs/{producteurId}/recoltes:
+    get:
+      tags:
+      - Producteurs et parcelles
+      operationId: recoltes
+      parameters:
+      - name: producteurId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecolteVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/producteurs/{producteurId}/parcelles/{parcelleId}:
+    get:
+      tags:
+      - Producteurs et parcelles
+      operationId: parcelle
+      parameters:
+      - name: producteurId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: parcelleId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParcelleVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/producteurs/{producteurId}/paiements:
+    get:
+      tags:
+      - Producteurs et parcelles
+      operationId: paiements
+      parameters:
+      - name: producteurId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PaiementVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/producteurs/{producteurId}/cultures:
+    get:
+      tags:
+      - Producteurs et parcelles
+      operationId: cultures
+      parameters:
+      - name: producteurId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CultureVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/prix-marche/{culture}:
+    get:
+      tags:
+      - Paramètres et prix du marché
+      operationId: prix
+      parameters:
+      - name: culture
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrixMarcheVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/parametres/cultures:
+    get:
+      tags:
+      - Paramètres et prix du marché
+      operationId: lister_1
+      parameters:
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ParametreCultureVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/commandes/{commandeId}/paiements:
+    get:
+      tags:
+      - "Offres, commandes et paiements"
+      operationId: paiements_1
+      parameters:
+      - name: commandeId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PaiementVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+  /api/v1/campagnes/{campagneId}/cultures:
+    get:
+      tags:
+      - "Campagnes, cultures et récoltes"
+      operationId: culturesDeLaCampagne
+      parameters:
+      - name: campagneId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: X-Utilisateur-Id
+        in: header
+        description: Identifiant de l'utilisateur simulé
+        required: true
+        schema:
+          type: string
+          example: "771234567"
+      - name: X-Role
+        in: header
+        description: "Rôle simulé : PRODUCTEUR, ACHETEUR, AGENT ou ADMINISTRATEUR"
+        required: true
+        schema:
+          type: string
+          example: AGENT
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CultureVue"
+        "404":
+          description: "Ressource introuvable, ou hors du périmètre de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "403":
+          description: Rôle insuffisant pour l'opération
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "500":
+          description: Erreur interne (aucun détail technique exposé)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "400":
+          description: "Requête invalide (règle métier, paramètre ou corps mal formé\
+            )"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+        "409":
+          description: "Conflit avec l'état actuel (doublon, transition interdite)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErreurApi"
+components:
+  schemas:
+    ErreurApi:
+      required:
+      - chemin
+      - code
+      - horodatage
+      - message
+      type: object
+      properties:
+        code:
+          type: string
+          example: REGLE_METIER
+        message:
+          type: string
+          example: La quantité minimale d'une commande est de 50 kg
+        details:
+          type: array
+          items:
+            type: string
+        horodatage:
+          type: string
+          format: date-time
+        chemin:
+          type: string
+          example: /api/v1/commandes
+      description: Format unique des erreurs de l'API
+    ModifierParametre:
+      type: object
+      properties:
+        rendementReferenceKgHa:
+          type: number
+        humiditeMaxPct:
+          type: number
+        cycleMinJours:
+          type: integer
+          format: int32
+    ParametreCultureVue:
+      type: object
+      properties:
+        code:
+          type: string
+        culture:
+          type: string
+        rendementReferenceKgHa:
+          type: number
+        humiditeMaxPct:
+          type: number
+        cycleMinJours:
+          type: integer
+          format: int32
+    Livraison:
+      type: object
+      properties:
+        quantiteKg:
+          type: number
+        tauxHumiditePct:
+          type: number
+        qualite:
+          type: string
+    LivraisonVue:
+      type: object
+      properties:
+        id:
+          type: string
+        recolteId:
+          type: string
+        lotId:
+          type: string
+        producteurId:
+          type: string
+        qualite:
+          type: string
+        quantiteKg:
+          type: number
+        tauxHumiditePct:
+          type: number
+        date:
+          type: string
+          format: date
+    EnregistrerProducteur:
+      type: object
+      properties:
+        nom:
+          type: string
+        prenom:
+          type: string
+        telephone:
+          type: string
+        village:
+          type: string
+    ParcelleVue:
+      type: object
+      properties:
+        id:
+          type: string
+        nom:
+          type: string
+        commune:
+          type: string
+        superficieHa:
+          type: number
+    ProducteurVue:
+      type: object
+      properties:
+        id:
+          type: string
+        nom:
+          type: string
+        prenom:
+          type: string
+        telephone:
+          type: string
+        village:
+          type: string
+        dateEnregistrement:
+          type: string
+          format: date
+        parcelles:
+          type: array
+          items:
+            $ref: "#/components/schemas/ParcelleVue"
+    DeclarerParcelle:
+      type: object
+      properties:
+        nom:
+          type: string
+        superficieHa:
+          type: number
+        commune:
+          type: string
+    ErreurImportVue:
+      type: object
+      properties:
+        ligne:
+          type: integer
+          format: int32
+        motif:
+          type: string
+    ImportVue:
+      type: object
+      properties:
+        acceptes:
+          type: integer
+          format: int32
+        refuses:
+          type: integer
+          format: int32
+        erreurs:
+          type: array
+          items:
+            $ref: "#/components/schemas/ErreurImportVue"
+    PublierOffre:
+      type: object
+      properties:
+        culture:
+          type: string
+        qualite:
+          type: string
+        quantiteKg:
+          type: number
+        prixKg:
+          type: integer
+          format: int64
+    OffreVue:
+      type: object
+      properties:
+        id:
+          type: string
+        culture:
+          type: string
+        qualite:
+          type: string
+        quantiteKg:
+          type: number
+        quantiteRestanteKg:
+          type: number
+        quantiteVendueKg:
+          type: number
+        prixKg:
+          type: integer
+          format: int64
+        statut:
+          type: string
+    PublicationOffreVue:
+      type: object
+      properties:
+        offre:
+          $ref: "#/components/schemas/OffreVue"
+        avertissementPrix:
+          type: string
+    DeclarerCulture:
+      type: object
+      properties:
+        campagneId:
+          type: string
+        parcelleId:
+          type: string
+        culture:
+          type: string
+        superficieHa:
+          type: number
+    CultureVue:
+      type: object
+      properties:
+        id:
+          type: string
+        campagneId:
+          type: string
+        parcelleId:
+          type: string
+        producteurId:
+          type: string
+        culture:
+          type: string
+        statut:
+          type: string
+        superficieHa:
+          type: number
+        dateSemis:
+          type: string
+          format: date
+        dateRecolte:
+          type: string
+          format: date
+        quantiteRecolteeKg:
+          type: number
+        rendementReferenceKgHa:
+          type: number
+        humiditeMaxPct:
+          type: number
+        cycleMinJours:
+          type: integer
+          format: int32
+    Semis:
+      type: object
+      properties:
+        dateSemis:
+          type: string
+          format: date
+    Recolte:
+      type: object
+      properties:
+        dateRecolte:
+          type: string
+          format: date
+        quantiteKg:
+          type: number
+    RecolteVue:
+      type: object
+      properties:
+        id:
+          type: string
+        cultureId:
+          type: string
+        producteurId:
+          type: string
+        culture:
+          type: string
+        quantiteKg:
+          type: number
+        dateRecolte:
+          type: string
+          format: date
+    PasserCommande:
+      type: object
+      properties:
+        offreId:
+          type: string
+        quantiteKg:
+          type: number
+    CommandeVue:
+      type: object
+      properties:
+        id:
+          type: string
+        offreId:
+          type: string
+        acheteurId:
+          type: string
+        culture:
+          type: string
+        qualite:
+          type: string
+        quantiteKg:
+          type: number
+        prixKg:
+          type: integer
+          format: int64
+        montantFrancs:
+          type: integer
+          format: int64
+        statut:
+          type: string
+        dateCreation:
+          type: string
+          format: date
+        dateLivraison:
+          type: string
+          format: date
+    LivraisonCommandeVue:
+      type: object
+      properties:
+        commande:
+          $ref: "#/components/schemas/CommandeVue"
+        commissionFrancs:
+          type: integer
+          format: int64
+        montantNetFrancs:
+          type: integer
+          format: int64
+        paiements:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaiementVue"
+    PaiementVue:
+      type: object
+      properties:
+        id:
+          type: string
+        commandeId:
+          type: string
+        producteurId:
+          type: string
+        montantFrancs:
+          type: integer
+          format: int64
+        statut:
+          type: string
+        statutSms:
+          type: string
+        dateCreation:
+          type: string
+          format: date
+    OuvrirCampagne:
+      type: object
+      properties:
+        saison:
+          type: string
+        annee:
+          type: integer
+          format: int32
+        dateDebut:
+          type: string
+          format: date
+        dateFin:
+          type: string
+          format: date
+    CampagneVue:
+      type: object
+      properties:
+        id:
+          type: string
+        saison:
+          type: string
+        annee:
+          type: integer
+          format: int32
+        dateDebut:
+          type: string
+          format: date
+        dateFin:
+          type: string
+          format: date
+        statut:
+          type: string
+    StockVue:
+      type: object
+      properties:
+        culture:
+          type: string
+        qualite:
+          type: string
+        totalKg:
+          type: number
+        reserveKg:
+          type: number
+        disponibleKg:
+          type: number
+    PrixMarcheVue:
+      type: object
+      properties:
+        culture:
+          type: string
+        prixKg:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date
+        issuDuCache:
+          type: boolean
+    PageCommandesVue:
+      type: object
+      properties:
+        commandes:
+          type: array
+          items:
+            $ref: "#/components/schemas/CommandeVue"
+        total:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int32
+        taille:
+          type: integer
+          format: int32
+  responses:
+    Erreur400:
+      description: Requête invalide (règle métier)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErreurApi"
+    Erreur403:
+      description: Rôle insuffisant
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErreurApi"
+    Erreur404:
+      description: Ressource introuvable
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErreurApi"
+    Erreur409:
+      description: Conflit avec l'état actuel
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErreurApi"
+    Erreur500:
+      description: Erreur interne
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErreurApi"
